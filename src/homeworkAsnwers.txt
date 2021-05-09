@@ -1,0 +1,91 @@
+Node(Leaf, 5, Node(Leaf, 2, Leaf))
+
+   5
+  / \
+ ()  2
+    / \
+   () ()
+
+
+Node(Node(Leaf,1,Leaf), 2, Node (Leaf,3,Leaf))
+
+	2
+    1	    3
+ L     L L      L
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// PROBLEM #1:
+
+let rec fold_inorder f acc tree = 
+  match tree with
+  | Leaf -> acc
+  | Node (l, mid, r) -> begin 
+      f (f mid (fold_inorder f acc l)) (fold_inorder f acc r);
+    end;;
+
+
+// PROBLEM #2:
+type 'a tree = 
+  | Node of  'a tree * 'a * 'a tree
+  | Leaf;; 
+      
+let at_level t level =
+  let rec at_level_aux t acc counter = match t with
+    | Leaf -> acc
+    | Node (l, x, r) ->
+        if counter=level then
+          x :: acc
+        else
+          at_level_aux l (at_level_aux r acc (counter + 1)) (counter + 1)
+  in
+  at_level_aux t [] 1;;
+
+let depth t =
+  let rec dep m = function (* d records current level, m records max depth so far *)
+    | [] -> m
+    | (Leaf,d)::tl -> dep (max m d) tl
+    | (Node (l,_,r),d)::tl -> dep (max m d) ((l,d+1)::(r,d+1)::tl)
+  in 
+  dep 0 [(t,0)]
+
+let t = (Node (Node (Leaf,1,Leaf), 2, Node (Leaf,3,Leaf)));;
+
+let rec traverseLevel currLevel totalLevels list =
+  if totalLevels-currLevel != totalLevels then begin 
+    traverseLevel (currLevel - 1) totalLevels (at_level t currLevel::list);
+  end else list;;
+
+traverseLevel (depth t) 0 [];;
+
+
+
+
+// PROBLEM #3
+type 'a tree = 
+  | Node of  'a tree * 'a * 'a tree
+  | Leaf;; 
+
+let depth tree =
+  let rec depth tree k = match tree with
+    | Leaf -> k 0
+    | Node(left,value,right) ->
+        depth left (fun dleft ->
+            depth right (fun dright -> 
+                print_int value;
+                (k (value + dleft + dright)) )); 
+  in depth tree (fun d -> d);;
+
+let t = (Node (Node (Leaf,1,Leaf), 2, Node (Leaf,3,Leaf)));;
+depth t;;
